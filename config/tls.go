@@ -10,6 +10,8 @@ import (
 func TLS(certPath string, keyPath string, clientCAPath string) (*tls.Config, error) {
 	tlsConfig := &tls.Config{}
 
+	var didSomething bool
+
 	if certPath != "" && keyPath != "" {
 		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 		if err != nil {
@@ -17,6 +19,7 @@ func TLS(certPath string, keyPath string, clientCAPath string) (*tls.Config, err
 		}
 
 		tlsConfig.Certificates = []tls.Certificate{cert}
+		didSomething = true
 	}
 
 	if clientCAPath != "" {
@@ -30,6 +33,11 @@ func TLS(certPath string, keyPath string, clientCAPath string) (*tls.Config, err
 
 		tlsConfig.ClientCAs = pool
 		tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
+		didSomething = true
+	}
+
+	if !didSomething {
+		return nil, nil
 	}
 
 	return tlsConfig, nil
